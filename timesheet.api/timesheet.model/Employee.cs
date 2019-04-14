@@ -14,7 +14,7 @@ namespace timesheet.model
         [Required]
         public string Code { get; set; }
 
-        [StringLength(255)]
+        [StringLength(260)]
         [Required]
         public string Name { get; set; }
     }

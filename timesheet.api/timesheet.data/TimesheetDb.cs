@@ -13,5 +13,6 @@ namespace timesheet.data
 
         public DbSet<Employee> Employees { get; set; }
         public DbSet<Task> Tasks { get; set; }
+        public DbSet<Effort> Efforts { get; set; }
     }
 }

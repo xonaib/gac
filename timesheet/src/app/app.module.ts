@@ -5,15 +5,21 @@ import { HttpClientModule } from '@angular/common/http';
 import { AppComponent } from './app.component';
 import { EmployeeListComponent } from './employee/employee.component';
 import { EmployeeService } from './services/employee.service';
+import { EmployeeTasksComponent } from './employee-tasks/employee-tasks.component';
+
+
+import { AppRoutingModule } from './app-routing.module';
 
 @NgModule({
   declarations: [
     AppComponent,
-    EmployeeListComponent
+    EmployeeListComponent,
+    EmployeeTasksComponent
   ],
   imports: [
     BrowserModule,
-    HttpClientModule
+    HttpClientModule,
+    AppRoutingModule
   ],
   providers: [
     EmployeeService

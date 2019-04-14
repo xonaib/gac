@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using timesheet.business;
+using timesheet.model;
 
 namespace timesheet.api.controllers
 {
@@ -25,6 +26,28 @@ namespace timesheet.api.controllers
             return new ObjectResult(items);
         }
 
+        // get list of tasks, and time spent against each task by day
+        [HttpGet("gettasks/{Id}")]
+        public IActionResult GetTasksForUser(int Id)
+        {
+            var dto = this.employeeService.GetEmployeeTasksAndEffort(Id);
+            return new ObjectResult(dto);
+        }
+
+
+        [HttpPost]
+        public IActionResult AddEffort([FromBody] Effort effort)
+        {
+            if (effort != null && ModelState.IsValid)
+            {
+                this.employeeService.AddEmployeeEffort(effort);
+
+                return new ObjectResult(true);
+            }
+
+            return new ObjectResult(false);
+
+        }
 
     }
 }
