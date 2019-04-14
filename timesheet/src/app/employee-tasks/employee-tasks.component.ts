@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { EmployeeService } from '../services/employee.service';
 import { ActivatedRoute } from '@angular/router';
 
-import { Employee, EmployeeTasksAndEffort, Task, Effort } from '../models';
+import { Employee, EmployeeTasksAndEffort, Task, Effort, DayToDateMapping } from '../models';
 import * as moment from 'moment';
 
 @Component({
@@ -16,10 +16,16 @@ export class EmployeeTasksComponent implements OnInit {
   employees: Employee[];
   currentEmp: Employee;
   tasks: Task[];
-  daysOfWeek: string[];
+
+  // week
+  daysOfWeek: DayToDateMapping[];
   displayWeek: number;
   minWeek: number;
   maxWeek: number;
+  weekStartDate: string;
+  weekEndDate: string;
+  dateFormat: string = 'YYYYMMDD';
+
 
   constructor(private employeeService: EmployeeService, private route: ActivatedRoute) { }
 
@@ -32,27 +38,11 @@ export class EmployeeTasksComponent implements OnInit {
       console.log('in task', this.employees);
     }); */
 
-
-    
-
-    const today = moment();
-    const from_date = today.startOf('week').isoWeekday(1); //today.startOf('isoWeek');
-    const to_date = today.endOf('week').isoWeekday(0);
-    console.log({
-      from_date: from_date.toString(),
-      today: moment().toString(),
-      to_date: to_date.toString(),
-    });
     this.displayWeek = moment().week();
     this.minWeek = 1;
     this.maxWeek = this.weeksInYear(moment().year());
 
-    debugger;
-    // https://stackoverflow.com/questions/18875649/moment-js-starting-the-week-on-monday-with-isoweekday
-    // https://stackoverflow.com/questions/25905183/using-moment-js-to-create-an-array-with-days-of-the-week-and-hours-of-the-day
-    this.daysOfWeek = Array.apply(null, Array(7)).map(function (_, i) {
-      return moment(i, 'e').startOf('week').isoWeekday(i + 1).format('dddd');
-    });
+    this.updateStartAndEndOfWeekFromWeekNumber();
 
     // fetch employees
     this.employeeService.getallemployees().subscribe(data => {
@@ -91,12 +81,47 @@ export class EmployeeTasksComponent implements OnInit {
     this.updatePageForEmployeeChange();
   }
 
+  changeWeek(dir: number) {
+    if (this.minWeek <= (this.displayWeek + dir) && (this.displayWeek + dir) <= this.maxWeek) {
+      // allow change of direction
+      this.displayWeek = this.displayWeek + dir;
+
+      this.updateStartAndEndOfWeekFromWeekNumber();
+    }
+  }
+
+  // https://til.hashrocket.com/posts/cxd9yl95ip--get-begining-and-end-of-week-with-momentjs
+  // https://stackoverflow.com/questions/11154673/get-the-correct-week-number-of-a-given-date
+  // https://stackoverflow.com/questions/2821035/c-sharp-get-start-date-and-last-date-based-on-current-date
+  // https://stackoverflow.com/questions/18875649/moment-js-starting-the-week-on-monday-with-isoweekday
+  // https://stackoverflow.com/questions/25905183/using-moment-js-to-create-an-array-with-days-of-the-week-and-hours-of-the-day
+  updateStartAndEndOfWeekFromWeekNumber() {
+    const current = moment().day('Monday').week(this.displayWeek),
+    self = this;
+
+    //this.weekStartDate = current.startOf('week').isoWeekday(1).format(this.dateFormat); //today.startOf('isoWeek');
+    //this.weekEndDate = current.startOf('week').isoWeekday(1).add(7, 'day').format(this.dateFormat);
+    //current.endOf('week').isoWeekday(0).format(this.dateFormat);
+
+    this.daysOfWeek = Array.apply(null, Array(7)).map(function (_, i) {
+      const dt = moment(current.toDate()).add(i, 'day').startOf('week').isoWeekday(i + 1);
+      //moment(i, 'e').startOf('week').isoWeekday(i + 1);
+      return {
+        day: dt.format('dddd'),
+        date: dt.format(self.dateFormat)
+      };
+    });
+
+    this.weekStartDate = this.daysOfWeek[0].date.toString();
+    this.weekEndDate = this.daysOfWeek[this.daysOfWeek.length - 1].date.toString();
+  }
+
   // https://stackoverflow.com/questions/18478741/get-weeks-in-year
   weeksInYear(year: number): number {
     return Math.max(
-             moment(new Date(year, 11, 31)).isoWeek()
-           , moment(new Date(year, 11, 31 - 7)).isoWeek()
+      moment(new Date(year, 11, 31)).isoWeek()
+      , moment(new Date(year, 11, 31 - 7)).isoWeek()
     );
- }
+  }
 
 }

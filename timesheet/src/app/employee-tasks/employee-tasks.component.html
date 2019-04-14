@@ -8,18 +8,24 @@ Select Employee
 
 <h1>{{empName}} Tasks</h1>
 
-<label>&lt;</label>
+<label (click)="changeWeek(-1)">&lt;</label>
  Week {{displayWeek}}
- <label>&gt;</label>
+ <label (click)="changeWeek(+1)">&gt;</label>
+
+ {{weekStartDate}} -- {{weekEndDate}}
 
 <table class="table">
+  <!-- header of days-->
   <tr>
     <th></th>
     <th *ngFor="let day of daysOfWeek">
-      {{day}}
+      {{day.day}}
     </th>
   </tr>
   <tr *ngFor="let task of tasks">
       <td>{{task.name}}</td>
+      <td *ngFor="let day of daysOfWeek"> 
+        {{day.date}}
+      </td>
   </tr> 
 </table>

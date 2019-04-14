@@ -22,3 +22,8 @@ export interface EmployeeTasksAndEffort {
     tasks: Task[];
     efforts: Effort[];
 }
+
+export interface DayToDateMapping {
+    day: string;
+    date: number;
+}
