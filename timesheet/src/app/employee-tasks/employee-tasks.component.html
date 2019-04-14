@@ -1,3 +1,25 @@
-<p>
-  employee-tasks works!
-</p>
+
+Select Employee
+<select [(ngModel)]="empId" (change)="empChanged()">
+  <option *ngFor="let emp of employees" value="{{emp.id}}">
+    {{emp.name}}
+  </option>
+</select>
+
+<h1>{{empName}} Tasks</h1>
+
+<label>&lt;</label>
+ Week {{displayWeek}}
+ <label>&gt;</label>
+
+<table class="table">
+  <tr>
+    <th></th>
+    <th *ngFor="let day of daysOfWeek">
+      {{day}}
+    </th>
+  </tr>
+  <tr *ngFor="let task of tasks">
+      <td>{{task.name}}</td>
+  </tr> 
+</table>

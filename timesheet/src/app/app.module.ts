@@ -9,6 +9,8 @@ import { EmployeeTasksComponent } from './employee-tasks/employee-tasks.componen
 
 
 import { AppRoutingModule } from './app-routing.module';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+//import * as moment from 'moment';
 
 @NgModule({
   declarations: [
@@ -19,7 +21,8 @@ import { AppRoutingModule } from './app-routing.module';
   imports: [
     BrowserModule,
     HttpClientModule,
-    AppRoutingModule
+    AppRoutingModule,
+    FormsModule
   ],
   providers: [
     EmployeeService

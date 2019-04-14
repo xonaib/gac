@@ -5,9 +5,9 @@ export interface Employee {
 }
 
 export interface Task {
-    Id: number;
-    Name: string;
-    Description: string;
+    id: number;
+    name: string;
+    description: string;
 }
 
 export interface Effort {
