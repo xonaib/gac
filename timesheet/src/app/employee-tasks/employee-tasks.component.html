@@ -1,18 +1,24 @@
-
-Select Employee
-<select [(ngModel)]="empId" (change)="empChanged()">
-  <option *ngFor="let emp of employees" value="{{emp.id}}">
-    {{emp.name}}
-  </option>
-</select>
+<div class="row margin-top-10">
+  <div class="col-sm-10">
+    Select Employee
+    <select [(ngModel)]="empId" (change)="empChanged()">
+      <option *ngFor="let emp of employees" value="{{emp.id}}">
+        {{emp.name}}
+      </option>
+    </select>
+  </div>
+  <div class="col-sm-2">
+    <span class="material-icons" (click)="openModal(template)">add_circle</span>
+  </div>
+</div>
 
 <h1>{{empName}} Tasks</h1>
 
 <label (click)="changeWeek(-1)">&lt;</label>
- Week {{displayWeek}}
- <label (click)="changeWeek(+1)">&gt;</label>
+Week {{displayWeek}}
+<label (click)="changeWeek(+1)">&gt;</label>
 
- {{weekStartDate}} -- {{weekEndDate}}
+{{weekStartDate}} -- {{weekEndDate}}
 
 <table class="table">
   <!-- header of days-->
@@ -23,9 +29,61 @@ Select Employee
     </th>
   </tr>
   <tr *ngFor="let task of tasks">
-      <td>{{task.name}}</td>
-      <td *ngFor="let day of daysOfWeek"> 
-        {{day.date}}
-      </td>
-  </tr> 
+    <td>{{task.name}}</td>
+    <td *ngFor="let day of daysOfWeek">
+      {{day.date}}
+    </td>
+  </tr>
 </table>
+
+<ng-template #template>
+  <div class="modal-header">
+    <h4 class="modal-title pull-left">Modal</h4>
+    <button type="button" class="close pull-right" aria-label="Close" (click)="modalRef.hide()">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <form name="form" #f="ngForm" class="form-inline">
+
+      <!-- Task -->
+      <div class="form-group">
+          <label for="task" class="form-label">Task</label>
+
+          <select class="form-control full" [(ngModel)]="loggedTaskId" name="task">
+              <option *ngFor="let task of tasks" value="{{task.id}}">
+                {{task.name}}
+              </option>
+            </select>
+      </div>
+
+      <!-- day -->
+      <div class="form-group">
+          <label for="day" class="form-label">Day</label>
+  
+          <select class="form-control full" [(ngModel)]="dayOfWork" name="day">
+              <option *ngFor="let day of daysOfWeek" value="{{day.date}}">
+                {{day.day}}
+              </option>
+            </select>
+        </div>
+
+
+      <!-- hours -->
+      <div class="form-group">
+        <label for="hours" class="form-label">Hours</label>
+
+        <input type="number" name="hours" min="0" max="24"  step="1" pattern="^[0-9]" required
+          class="form-control full" [(ngModel)]="loggedHours" #hours="ngModel" />
+      </div>
+
+    </form>
+
+    
+  </div>
+  <div class="modal-footer">
+    <button type="button" href="javascript:void(0);" class="btn btn-primary" (click)="addHours()">Add</button>
+    <button type="button" href="javascript:void(0);" class="btn btn-secondary" (click)="modalRef.hide()">Cancel</button>
+  </div>
+
+</ng-template>

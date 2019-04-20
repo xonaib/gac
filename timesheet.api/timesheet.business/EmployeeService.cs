@@ -31,6 +31,15 @@ namespace timesheet.business
         public void AddEmployeeEffort(Effort effort)
         {
             this.db.Efforts.Add(effort);
+
+            this.db.SaveChanges();
+        }
+
+        public void AddEmployeeEfforts(List<Effort> efforts)
+        {
+            this.db.Efforts.AddRange(efforts);
+
+            this.db.SaveChanges();
         }
     }
 }

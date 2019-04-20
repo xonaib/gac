@@ -1,3 +1,6 @@
+$material-icons-font-path: '~material-icons/iconfont/';
+ 
+@import '~material-icons/iconfont/material-icons.scss';
 /* You can add global styles to this file, and also import other style files */
 body{
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif
@@ -25,3 +28,40 @@ h1{
       tr:hover {background-color: #ddd;}
   }
   
+.margin-top-10 {
+    margin-top:10px;
+}
+
+.form-inline {
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-flow: row wrap;
+    flex-flow: row wrap;
+    -ms-flex-align: center;
+    align-items: center;
+}
+
+.form-group {
+    width: 100%;
+    margin-bottom: 20px !important;
+    display: block;
+}
+
+.form-label {
+    width: 12%;
+}
+
+.form-group .form-control {
+    border-radius: 0;
+}
+
+.form-inline .form-control {
+    display: inline-block;
+    width: auto;
+    vertical-align: middle;
+}
+
+.form-control:hover {
+    border-color: #aaa;
+    background-color: #f9f9f9;
+}

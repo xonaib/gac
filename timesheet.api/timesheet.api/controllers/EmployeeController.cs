@@ -35,12 +35,26 @@ namespace timesheet.api.controllers
         }
 
 
-        [HttpPost]
-        public IActionResult AddEffort([FromBody] Effort effort)
+        [HttpPost()]
+        public IActionResult AddEffort(Effort effort)
         {
             if (effort != null && ModelState.IsValid)
             {
                 this.employeeService.AddEmployeeEffort(effort);
+
+                return new ObjectResult(true);
+            }
+
+            return new ObjectResult(false);
+
+        }
+
+        [HttpPost()]
+        public IActionResult AddEfforts(List<Effort> efforts)
+        {
+            if (efforts != null && ModelState.IsValid)
+            {
+                this.employeeService.AddEmployeeEfforts(efforts);
 
                 return new ObjectResult(true);
             }

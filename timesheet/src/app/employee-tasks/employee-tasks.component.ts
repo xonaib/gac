@@ -1,10 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, TemplateRef, ViewChild, ViewChildren } from '@angular/core';
 import { EmployeeService } from '../services/employee.service';
 import { ActivatedRoute } from '@angular/router';
 
 import { Employee, EmployeeTasksAndEffort, Task, Effort, DayToDateMapping } from '../models';
 import * as moment from 'moment';
-
+import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
+import { FormGroup, FormArray, FormBuilder, Validators } from '@angular/forms';
 @Component({
   selector: 'app-employee-tasks',
   templateUrl: './employee-tasks.component.html',
@@ -26,8 +27,17 @@ export class EmployeeTasksComponent implements OnInit {
   weekEndDate: string;
   dateFormat: string = 'YYYYMMDD';
 
+  // popup
+  modalRef: BsModalRef;
 
-  constructor(private employeeService: EmployeeService, private route: ActivatedRoute) { }
+  // form fields
+  loggedTaskId: number;
+  loggedHours: number;
+  dayOfWork: number;
+  @ViewChild('f') form: any;
+
+  // tslint:disable-next-line:max-line-length
+  constructor(private employeeService: EmployeeService, private route: ActivatedRoute, private modalService: BsModalService) { }
 
   ngOnInit() {
     this.empId = this.route.snapshot.paramMap.get('id') != null ? Number(this.route.snapshot.paramMap.get('id')) : 0;
@@ -97,15 +107,16 @@ export class EmployeeTasksComponent implements OnInit {
   // https://stackoverflow.com/questions/25905183/using-moment-js-to-create-an-array-with-days-of-the-week-and-hours-of-the-day
   updateStartAndEndOfWeekFromWeekNumber() {
     const current = moment().day('Monday').week(this.displayWeek),
-    self = this;
+      self = this;
 
-    //this.weekStartDate = current.startOf('week').isoWeekday(1).format(this.dateFormat); //today.startOf('isoWeek');
-    //this.weekEndDate = current.startOf('week').isoWeekday(1).add(7, 'day').format(this.dateFormat);
-    //current.endOf('week').isoWeekday(0).format(this.dateFormat);
+    // this.weekStartDate = current.startOf('week').isoWeekday(1).format(this.dateFormat); //today.startOf('isoWeek');
+    // this.weekEndDate = current.startOf('week').isoWeekday(1).add(7, 'day').format(this.dateFormat);
+    // current.endOf('week').isoWeekday(0).format(this.dateFormat);
 
     this.daysOfWeek = Array.apply(null, Array(7)).map(function (_, i) {
-      const dt = moment(current.toDate()).add(i, 'day').startOf('week').isoWeekday(i + 1);
-      //moment(i, 'e').startOf('week').isoWeekday(i + 1);
+      const dt = moment(current.toDate()).add(i, 'day');
+      // moment(current.toDate()).add(i, 'day').startOf('week').isoWeekday(i + 1);
+      // moment(i, 'e').startOf('week').isoWeekday(i + 1);
       return {
         day: dt.format('dddd'),
         date: dt.format(self.dateFormat)
@@ -122,6 +133,38 @@ export class EmployeeTasksComponent implements OnInit {
       moment(new Date(year, 11, 31)).isoWeek()
       , moment(new Date(year, 11, 31 - 7)).isoWeek()
     );
+  }
+
+  openModal(template: TemplateRef<any>) {
+    // reset form
+    this.loggedTaskId = this.tasks[0].id;
+    this.dayOfWork = this.daysOfWeek[0].date;
+    this.loggedHours = 0;
+
+    this.modalRef = this.modalService.show(template);
+  }
+
+  addHours() {
+    debugger;
+    //if (!this.form.valid) {
+    //  return;
+    //}
+
+    console.log('form was valid and was submitted');
+    this.modalRef.hide();
+
+    const effort: Effort = {
+      employeeId: this.empId,
+      Date: this.dayOfWork,
+      hours: this.loggedHours,
+      taskId: this.loggedTaskId,
+      Id: 0
+    };
+
+    this.employeeService.postEmployeeEffort(effort).subscribe((data: boolean) => {
+      console.log(data);
+      debugger;
+    });
   }
 
 }

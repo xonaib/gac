@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { environment } from 'src/environments/environment.prod';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders  } from '@angular/common/http';
 import { Observable, Subject } from 'rxjs';
 
 // interfaces
@@ -9,6 +9,11 @@ import {Employee, Task, EmployeeTasksAndEffort, Effort } from '../models';
 @Injectable()
 export class EmployeeService {
     private baseapi = environment.apiUrl;
+
+    public httpHeaders = new HttpHeaders({
+        'Content-Type': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest'
+    });
 
     private empListSubject = new Subject<any>();
 
@@ -29,8 +34,18 @@ export class EmployeeService {
     }
 
     // get list of tasks against employee
-    getallTasksForEmployee(empId: number) : Observable<EmployeeTasksAndEffort> {
+    getallTasksForEmployee(empId: number): Observable<EmployeeTasksAndEffort> {
         return this.http.get<EmployeeTasksAndEffort>(this.baseapi + `/employee/gettasks/${empId}`);
+    }
+
+    postEmployeeEffort(effort: Effort): Observable<boolean> {
+        const url = `${this.baseapi}/employee/AddEffort`;
+
+        const options = {
+            headers: this.httpHeaders
+        };
+
+        return this.http.post<boolean>(url, effort, options);
     }
 
 }
