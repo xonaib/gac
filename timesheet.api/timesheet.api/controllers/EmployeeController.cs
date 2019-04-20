@@ -27,16 +27,16 @@ namespace timesheet.api.controllers
         }
 
         // get list of tasks, and time spent against each task by day
-        [HttpGet("gettasks/{Id}")]
-        public IActionResult GetTasksForUser(int Id)
+        [HttpGet("gettasks/{Id}/{StartDate}/{EndDate}")]
+        public IActionResult GetTasksForUser(int Id, int StartDate, int EndDate)
         {
-            var dto = this.employeeService.GetEmployeeTasksAndEffort(Id);
+            var dto = this.employeeService.GetEmployeeTasksAndEffort(Id, StartDate, EndDate);
             return new ObjectResult(dto);
         }
 
 
-        [HttpPost()]
-        public IActionResult AddEffort(Effort effort)
+        [HttpPost("AddEffort")]
+        public IActionResult AddEffort([FromBody] Effort effort)
         {
             if (effort != null && ModelState.IsValid)
             {
@@ -49,8 +49,8 @@ namespace timesheet.api.controllers
 
         }
 
-        [HttpPost()]
-        public IActionResult AddEfforts(List<Effort> efforts)
+        [HttpPost("AddEfforts")]
+        public IActionResult AddEfforts([FromBody] List<Effort> efforts)
         {
             if (efforts != null && ModelState.IsValid)
             {

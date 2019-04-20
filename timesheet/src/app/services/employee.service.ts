@@ -34,8 +34,8 @@ export class EmployeeService {
     }
 
     // get list of tasks against employee
-    getallTasksForEmployee(empId: number): Observable<EmployeeTasksAndEffort> {
-        return this.http.get<EmployeeTasksAndEffort>(this.baseapi + `/employee/gettasks/${empId}`);
+    getallTasksForEmployee(empId: number, startDate: number, endDate: number): Observable<EmployeeTasksAndEffort> {
+        return this.http.get<EmployeeTasksAndEffort>(this.baseapi + `/employee/gettasks/${empId}/${startDate}/${endDate}`);
     }
 
     postEmployeeEffort(effort: Effort): Observable<boolean> {
@@ -46,6 +46,16 @@ export class EmployeeService {
         };
 
         return this.http.post<boolean>(url, effort, options);
+    }
+
+    postEmployeeEfforts(efforts: Effort[]): Observable<boolean> {
+        const url = `${this.baseapi}/employee/AddEfforts`;
+
+        const options = {
+            headers: this.httpHeaders
+        };
+
+        return this.http.post<boolean>(url, efforts, options);
     }
 
 }

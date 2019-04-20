@@ -1,11 +1,12 @@
 import { Component, OnInit, TemplateRef, ViewChild, ViewChildren } from '@angular/core';
 import { EmployeeService } from '../services/employee.service';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router  } from '@angular/router';
 
 import { Employee, EmployeeTasksAndEffort, Task, Effort, DayToDateMapping } from '../models';
 import * as moment from 'moment';
 import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
 import { FormGroup, FormArray, FormBuilder, Validators } from '@angular/forms';
+
 @Component({
   selector: 'app-employee-tasks',
   templateUrl: './employee-tasks.component.html',
@@ -17,6 +18,7 @@ export class EmployeeTasksComponent implements OnInit {
   employees: Employee[];
   currentEmp: Employee;
   tasks: Task[];
+  showLoader: boolean;
 
   // week
   daysOfWeek: DayToDateMapping[];
@@ -26,6 +28,7 @@ export class EmployeeTasksComponent implements OnInit {
   weekStartDate: string;
   weekEndDate: string;
   dateFormat: string = 'YYYYMMDD';
+  workHoursByDay: number[];
 
   // popup
   modalRef: BsModalRef;
@@ -34,10 +37,17 @@ export class EmployeeTasksComponent implements OnInit {
   loggedTaskId: number;
   loggedHours: number;
   dayOfWork: number;
+  empEfforts: Map<number, Effort[]>;
   @ViewChild('f') form: any;
+  anyHoursLogged = false;
+
+  // message
+  modalTitle: string;
+  modalMessage: string;
+  buttonOneText: string;
 
   // tslint:disable-next-line:max-line-length
-  constructor(private employeeService: EmployeeService, private route: ActivatedRoute, private modalService: BsModalService) { }
+  constructor(private employeeService: EmployeeService, private route: ActivatedRoute, private modalService: BsModalService, private router: Router) { }
 
   ngOnInit() {
     this.empId = this.route.snapshot.paramMap.get('id') != null ? Number(this.route.snapshot.paramMap.get('id')) : 0;
@@ -68,23 +78,65 @@ export class EmployeeTasksComponent implements OnInit {
       return;
     }
 
-    this.currentEmp = this.employees.find(f => f.id === this.empId);
+    this.currentEmp = this.employees.find(f => f.Id === this.empId);
 
     if (this.currentEmp == null) {
       return;
     }
 
-    this.empName = this.currentEmp.name;
+    this.anyHoursLogged = false;
+    this.empName = this.currentEmp.Name;
 
-    this.employeeService.getallTasksForEmployee(this.empId).subscribe((data: EmployeeTasksAndEffort) => {
-      console.log(data);
+    this.employeeService.getallTasksForEmployee(this.empId, Number(this.weekStartDate), Number(this.weekEndDate))
+      .subscribe((data: EmployeeTasksAndEffort) => {
+        console.log(data);
 
-      this.tasks = data.tasks;
-    });
+        this.tasks = data.tasks;
+
+        // initialize empty array with 7 number of days
+        this.workHoursByDay = Array(7).fill(0);
+        this.empEfforts = new Map<number, Effort[]>();
+
+        // rows
+        this.tasks.forEach((task: Task, idx: number) => {
+          let taskEfforts: Effort[] = data.efforts.filter(f => f.taskId == task.Id),
+            orderedTasks: Effort[] = [];
+            //hoursForDay: number = 0;
+
+          if (taskEfforts == null) {
+            taskEfforts = [];
+          }
+
+          // cols
+          this.daysOfWeek.forEach((day: DayToDateMapping, dayIdx: number) => {
+            day.date = Number(day.date);
+            let taskForDay: Effort = taskEfforts.find(f => f.Date == day.date);
+
+            if (taskForDay == null) {
+              taskForDay = {
+                Id: 0,
+                Date: day.date,
+                hours: 0,
+                taskId: task.Id,
+                employeeId: this.empId
+              };
+            }
+
+            this.workHoursByDay[dayIdx] += taskForDay.hours;
+            // hoursForDay += taskForDay.hours;
+            orderedTasks.push(taskForDay);
+          });
+
+          // this.empEfforts[task.id] = orderedTasks;
+          this.empEfforts.set(task.Id, orderedTasks);
+        });
+        // empEfforts
+      });
   }
 
   // on empId changed
   empChanged() {
+    this.anyHoursLogged = false;
     // because it was being passed as a string
     this.empId = Number(this.empId);
 
@@ -119,7 +171,8 @@ export class EmployeeTasksComponent implements OnInit {
       // moment(i, 'e').startOf('week').isoWeekday(i + 1);
       return {
         day: dt.format('dddd'),
-        date: dt.format(self.dateFormat)
+        date: dt.format(self.dateFormat),
+        idx: i
       };
     });
 
@@ -137,33 +190,115 @@ export class EmployeeTasksComponent implements OnInit {
 
   openModal(template: TemplateRef<any>) {
     // reset form
-    this.loggedTaskId = this.tasks[0].id;
+    this.loggedTaskId = this.tasks[0].Id;
     this.dayOfWork = this.daysOfWeek[0].date;
-    this.loggedHours = 0;
+    this.loggedHours = 1;
 
     this.modalRef = this.modalService.show(template);
   }
 
-  addHours() {
-    debugger;
+  keyEntry($event: any) {
+    $event.preventDefault();
+    return false;
+  }
+
+  addHours(modaltemplate: TemplateRef<any>) {
+
     //if (!this.form.valid) {
     //  return;
     //}
-
-    console.log('form was valid and was submitted');
     this.modalRef.hide();
+    this.loggedTaskId = Number(this.loggedTaskId);
+    this.dayOfWork = Number(this.dayOfWork);
+    this.loggedHours = Number(this.loggedHours);
 
-    const effort: Effort = {
-      employeeId: this.empId,
-      Date: this.dayOfWork,
-      hours: this.loggedHours,
-      taskId: this.loggedTaskId,
-      Id: 0
-    };
+    const taskId: number = this.loggedTaskId, // row
+      dayOfWork = this.dayOfWork;
 
-    this.employeeService.postEmployeeEffort(effort).subscribe((data: boolean) => {
-      console.log(data);
-      debugger;
+    // update correct item in grid
+    let userEfforts: Effort[] = this.empEfforts.get(taskId);
+
+    if (userEfforts != null) {
+      let userEffortIdx = userEfforts.findIndex(f => f.Date == dayOfWork);
+
+      // index of day, column
+      if (userEffortIdx > -1) {
+        this.anyHoursLogged = true;
+
+        userEfforts[userEffortIdx].isDirty = true;
+        userEfforts[userEffortIdx].hours = this.loggedHours;
+
+        // reset hours for day to zero
+        this.workHoursByDay[userEffortIdx] = 0;
+
+        // calculate total hours for the day
+        // for each row
+        this.tasks.forEach((task: Task, idx: number) => {
+          const efforts: Effort[] = this.empEfforts.get(task.Id);
+
+          this.workHoursByDay[userEffortIdx] += efforts[userEffortIdx].hours;
+        });
+      }
+    }
+
+    // reset stuff
+    this.loggedTaskId = this.tasks[0].id;
+    this.dayOfWork = this.daysOfWeek[0].date;
+    this.loggedHours = 1;
+
+    // show message
+    this.modalTitle = 'Saved';
+    this.modalMessage = 'Record has been locally updated.';
+    this.buttonOneText = 'OK';
+
+    this.modalRef = this.modalService.show(modaltemplate);
+  }
+
+  goBack(modaltemplate: TemplateRef<any>) {
+    if (this.anyHoursLogged) {
+      // confirmation popup
+    }
+
+    this.router.navigate(['']);
+  }
+
+  postEfforts(modaltemplate: TemplateRef<any>) {
+    let userAddedEfforts: Effort[] = [];
+    this.tasks.forEach((task: Task, idx: number) => {
+      const efforts: Effort[] = this.empEfforts.get(task.Id).filter(f => f.isDirty);
+
+      if (efforts.length > 0) {
+        userAddedEfforts = userAddedEfforts.concat(efforts);
+      }
+    });
+
+    if (userAddedEfforts.length == 0) {
+      // nothig to update, return
+
+      this.modalTitle = 'Nothing to save';
+      this.modalMessage = 'Please add hours against tasks to save.';
+      this.buttonOneText = 'OK';
+
+      this.modalRef = this.modalService.show(modaltemplate);
+      return;
+    }
+
+    this.showLoader = true;
+    console.log('form was valid and was submitted');
+
+    this.employeeService.postEmployeeEfforts(userAddedEfforts).subscribe((result: boolean) => {
+      console.log(result);
+      this.showLoader = false;
+
+      this.modalTitle = 'Saved';
+      this.modalMessage = result ? 'Data was saved.' : 'Data could not be saved.';
+      this.buttonOneText = 'OK';
+
+      this.modalRef = this.modalService.show(modaltemplate);
+
+      if (result) {
+        this.updatePageForEmployeeChange();
+      }
     });
   }
 

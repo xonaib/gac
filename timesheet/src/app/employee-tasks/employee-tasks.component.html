@@ -1,9 +1,13 @@
+<div class="loaderHolder" [class.hidden]="!showLoader" id="loaderHolder">
+  <div class="loading"></div>
+</div>
+
 <div class="row margin-top-10">
   <div class="col-sm-10">
     Select Employee
     <select [(ngModel)]="empId" (change)="empChanged()">
-      <option *ngFor="let emp of employees" value="{{emp.id}}">
-        {{emp.name}}
+      <option *ngFor="let emp of employees" value="{{emp.Id}}">
+        {{emp.Name}}
       </option>
     </select>
   </div>
@@ -20,21 +24,47 @@ Week {{displayWeek}}
 
 {{weekStartDate}} -- {{weekEndDate}}
 
+
+
 <table class="table">
   <!-- header of days-->
   <tr>
     <th></th>
     <th *ngFor="let day of daysOfWeek">
-      {{day.day}}
+      {{day.day}} <!-- -- {{day.date}} -->
     </th>
   </tr>
   <tr *ngFor="let task of tasks">
-    <td>{{task.name}}</td>
-    <td *ngFor="let day of daysOfWeek">
-      {{day.date}}
+    <td>{{task.Name}}  <!-- -- {{task.Id}} --></td>
+
+    <td *ngFor="let effort of empEfforts.get(task.Id)">
+      <!-- empEfforts.get(task.id) -->
+      {{effort.hours}}  <!-- - {{task.Id}} -- {{effort.taskId}} -- {{effort.Date}} -->
+    </td>
+  </tr>
+
+  <!-- total row -->
+  <tr>
+    <td>Total</td>
+
+    <td *ngFor="let hrs of workHoursByDay">
+      {{hrs}}
     </td>
   </tr>
 </table>
+
+<div class="row">
+  <div class="col-sm-8">
+
+  </div>
+  <div class="col-sm-2">
+    <a href="javascript:void(0);" class="btn btn-secondary" (click)="goBack(modaltemplate)">Back to List</a>
+  </div>
+  <div class="col-sm-2">
+    <a href="javascript:void(0);" class="btn btn-primary" (click)="postEfforts(modaltemplate)" 
+    [ngClass]="{'disabled': (!anyHoursLogged)}">Save</a>
+  </div>
+</div>
 
 <ng-template #template>
   <div class="modal-header">
@@ -48,42 +78,61 @@ Week {{displayWeek}}
 
       <!-- Task -->
       <div class="form-group">
-          <label for="task" class="form-label">Task</label>
+        <label for="task" class="form-label">Task</label>
 
-          <select class="form-control full" [(ngModel)]="loggedTaskId" name="task">
-              <option *ngFor="let task of tasks" value="{{task.id}}">
-                {{task.name}}
-              </option>
-            </select>
+        <select class="form-control full" [(ngModel)]="loggedTaskId" name="task">
+          <option *ngFor="let task of tasks" value="{{task.Id}}">
+            {{task.Name}}
+          </option>
+        </select>
       </div>
 
       <!-- day -->
       <div class="form-group">
-          <label for="day" class="form-label">Day</label>
-  
-          <select class="form-control full" [(ngModel)]="dayOfWork" name="day">
-              <option *ngFor="let day of daysOfWeek" value="{{day.date}}">
-                {{day.day}}
-              </option>
-            </select>
-        </div>
+        <label for="day" class="form-label">Day</label>
+
+        <select class="form-control full" [(ngModel)]="dayOfWork" name="day">
+          <option *ngFor="let day of daysOfWeek" value="{{day.date}}">
+            {{day.day}}
+          </option>
+        </select>
+      </div>
 
 
       <!-- hours -->
       <div class="form-group">
         <label for="hours" class="form-label">Hours</label>
 
-        <input type="number" name="hours" min="0" max="24"  step="1" pattern="^[0-9]" required
-          class="form-control full" [(ngModel)]="loggedHours" #hours="ngModel" />
+        <input type="number" name="hours" min="1" max="24" step="1" pattern="^[0-9]" required
+          (keydown)="keyEntry($event)" class="form-control full" [(ngModel)]="loggedHours" #hours="ngModel" />
       </div>
 
     </form>
 
-    
+
   </div>
   <div class="modal-footer">
-    <button type="button" href="javascript:void(0);" class="btn btn-primary" (click)="addHours()">Add</button>
+    <button type="button" href="javascript:void(0);" class="btn btn-primary"
+      (click)="addHours(modaltemplate)">Add</button>
     <button type="button" href="javascript:void(0);" class="btn btn-secondary" (click)="modalRef.hide()">Cancel</button>
   </div>
 
+</ng-template>
+
+<ng-template #modaltemplate>
+  <div class="angularModal">
+    <div class="modal-header">
+      <h4 class="modal-title pull-left">{{modalTitle}}</h4>
+      <button type="button" class="close pull-right" aria-label="Close" (click)="modalRef.hide()">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      {{modalMessage}}
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-primary" (click)="modalRef.hide()"
+        *ngIf="(buttonOneText.length > 0)">{{buttonOneText}}</button>
+    </div>
+  </div>
 </ng-template>

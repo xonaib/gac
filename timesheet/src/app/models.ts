@@ -1,13 +1,13 @@
 export interface Employee {
-    id: number;
-    code: string;
-    name: string;
+    Id: number;
+    Code: string;
+    Name: string;
 }
 
 export interface Task {
-    id: number;
-    name: string;
-    description: string;
+    Id: number;
+    Name: string;
+    Description: string;
 }
 
 export interface Effort {
@@ -16,6 +16,7 @@ export interface Effort {
     hours: number;
     taskId: number;
     employeeId: number;
+    isDirty?: boolean;
 }
 
 export interface EmployeeTasksAndEffort {
@@ -26,4 +27,5 @@ export interface EmployeeTasksAndEffort {
 export interface DayToDateMapping {
     day: string;
     date: number;
+    idx: number;
 }

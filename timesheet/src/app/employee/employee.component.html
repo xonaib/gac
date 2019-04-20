@@ -8,10 +8,10 @@
         <th>Weekly Effort (Average)</th>
     </tr>
     <ng-container *ngFor="let item of employees">
-        <tr [routerLink]="['Tasks', item.id]">
-            <td>{{item.id}}</td>
-            <td>{{item.code}}</td>
-            <td>{{item.name}}</td>
+        <tr [routerLink]="['Tasks', item.Id]">
+            <td>{{item.Id}}</td>
+            <td>{{item.Code}}</td>
+            <td>{{item.Name}}</td>
             <td></td>
             <td></td>
         </tr>
