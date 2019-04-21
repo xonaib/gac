@@ -19,10 +19,10 @@ namespace timesheet.api.controllers
             this.employeeService = employeeService;
         }
 
-        [HttpGet("getall")]
-        public IActionResult GetAll()
+        [HttpGet("getall/{StartDate}/{EndDate}")]
+        public IActionResult GetAll(int StartDate, int EndDate)
         {
-            var items = this.employeeService.GetEmployees();
+            var items = this.employeeService.GetEmployeesAndTime(StartDate, EndDate);
             return new ObjectResult(items);
         }
 
@@ -34,7 +34,11 @@ namespace timesheet.api.controllers
             return new ObjectResult(dto);
         }
 
-
+        /// <summary>
+        /// adds one instance of work against a tasks
+        /// </summary>
+        /// <param name="effort"></param>
+        /// <returns></returns>
         [HttpPost("AddEffort")]
         public IActionResult AddEffort([FromBody] Effort effort)
         {
@@ -49,6 +53,11 @@ namespace timesheet.api.controllers
 
         }
 
+        /// <summary>
+        /// adds group of efforts for a user
+        /// </summary>
+        /// <param name="efforts"></param>
+        /// <returns></returns>
         [HttpPost("AddEfforts")]
         public IActionResult AddEfforts([FromBody] List<Effort> efforts)
         {

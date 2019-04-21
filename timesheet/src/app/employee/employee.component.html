@@ -7,13 +7,13 @@
         <th>Weekly Effort (Total)</th>
         <th>Weekly Effort (Average)</th>
     </tr>
-    <ng-container *ngFor="let item of employees">
-        <tr [routerLink]="['Tasks', item.Id]">
-            <td>{{item.Id}}</td>
-            <td>{{item.Code}}</td>
-            <td>{{item.Name}}</td>
-            <td></td>
-            <td></td>
+    <ng-container *ngFor="let emp of employees">
+        <tr [routerLink]="['Tasks', emp.Id]" class="pointer">
+            <td>{{emp.Id}}</td>
+            <td>{{emp.Code}}</td>
+            <td>{{emp.Name}}</td>
+            <td>{{emp.Hours}}</td>
+            <td>{{emp.AvgHours}}</td>
         </tr>
     </ng-container>
 </table>

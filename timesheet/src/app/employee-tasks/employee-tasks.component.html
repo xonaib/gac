@@ -18,40 +18,51 @@
 
 <h1>{{empName}} Tasks</h1>
 
-<label (click)="changeWeek(-1)">&lt;</label>
-Week {{displayWeek}}
-<label (click)="changeWeek(+1)">&gt;</label>
+<div class="row">
+  <div class="col-sm-12">
+    <p class=text-center>
+        <label (click)="changeWeek(-1)">&lt;</label>
+        Week {{displayWeek}}
+        <label (click)="changeWeek(+1)">&gt;</label>
+        
+        
+    </p>
+  </div>
+</div>
 
-{{weekStartDate}} -- {{weekEndDate}}
 
 
+<div class="row">
+  <div class="col-sm-12">
+    <table class="table">
+      <!-- header of days-->
+      <tr>
+        <th></th>
+        <th *ngFor="let day of daysOfWeek">
+          {{day.day}} <!-- -- {{day.date}} -->
+        </th>
+      </tr>
+      <tr *ngFor="let task of tasks">
+        <td>{{task.Name}}  <!-- -- {{task.Id}} --></td>
+    
+        <td *ngFor="let effort of empEfforts.get(task.Id)">
+          <!-- empEfforts.get(task.id) -->
+          {{effort.Hours}}  <!-- - {{task.Id}} -- {{effort.taskId}} -- {{effort.Date}} -->
+        </td>
+      </tr>
+    
+      <!-- total row -->
+      <tr>
+        <td>Total</td>
+    
+        <td *ngFor="let hrs of workHoursByDay">
+          {{hrs}}
+        </td>
+      </tr>
+    </table>
+  </div>
+</div>
 
-<table class="table">
-  <!-- header of days-->
-  <tr>
-    <th></th>
-    <th *ngFor="let day of daysOfWeek">
-      {{day.day}} <!-- -- {{day.date}} -->
-    </th>
-  </tr>
-  <tr *ngFor="let task of tasks">
-    <td>{{task.Name}}  <!-- -- {{task.Id}} --></td>
-
-    <td *ngFor="let effort of empEfforts.get(task.Id)">
-      <!-- empEfforts.get(task.id) -->
-      {{effort.hours}}  <!-- - {{task.Id}} -- {{effort.taskId}} -- {{effort.Date}} -->
-    </td>
-  </tr>
-
-  <!-- total row -->
-  <tr>
-    <td>Total</td>
-
-    <td *ngFor="let hrs of workHoursByDay">
-      {{hrs}}
-    </td>
-  </tr>
-</table>
 
 <div class="row">
   <div class="col-sm-8">

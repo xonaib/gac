@@ -14,16 +14,16 @@ namespace timesheet.model
         public long Date { get; set; }
         
         [Required]
-        public int hours { get; set; }
+        public int Hours { get; set; }
 
         [ForeignKey("task")]
-        public int taskId { get; set; }
+        public int TaskId { get; set; }
 
         [ForeignKey("employee")]
-        public int employeeId { get; set; }
+        public int EmployeeId { get; set; }
        
-        public Employee employee { get; set; }
+        public Employee Employee { get; set; }
 
-        public Task task { get; set; }
+        public Task Task { get; set; }
     }
 }

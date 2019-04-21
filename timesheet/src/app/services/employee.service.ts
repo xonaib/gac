@@ -2,9 +2,9 @@ import { Injectable } from '@angular/core';
 import { environment } from 'src/environments/environment.prod';
 import { HttpClient, HttpHeaders  } from '@angular/common/http';
 import { Observable, Subject } from 'rxjs';
-
+import * as moment from 'moment';
 // interfaces
-import {Employee, Task, EmployeeTasksAndEffort, Effort } from '../models';
+import {Employee, Task, EmployeeTasksAndEffort, Effort, WeekStartAndEndDates, DayToDateMapping } from '../models';
 
 @Injectable()
 export class EmployeeService {
@@ -29,8 +29,8 @@ export class EmployeeService {
     }
 
     // get list of employees
-    getallemployees() : Observable<Employee[]> {
-        return this.http.get<Employee[]>(this.baseapi + '/employee/getall');
+    getallemployees(startDate: number, endDate: number): Observable<Employee[]> {
+        return this.http.get<Employee[]>(this.baseapi + `/employee/getall/${startDate}/${endDate}`);
     }
 
     // get list of tasks against employee
@@ -56,6 +56,20 @@ export class EmployeeService {
         };
 
         return this.http.post<boolean>(url, efforts, options);
+    }
+
+    getWeekStartAndEndDates(weekNo: number = 0): WeekStartAndEndDates {
+        if (weekNo === 0) {
+            weekNo = moment().week();
+        }
+        const dateFormat: string = 'YYYYMMDD',
+            current = moment().day('Monday').week(weekNo);
+
+        const dates: WeekStartAndEndDates = {
+            weekStartDate: Number(moment(current.toDate()).format(dateFormat)),
+            weekEndDate: Number(moment(current.toDate()).add(7, 'day').format(dateFormat))
+        };
+        return dates;
     }
 
 }

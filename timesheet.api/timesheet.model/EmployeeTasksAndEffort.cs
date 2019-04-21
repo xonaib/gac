@@ -8,10 +8,16 @@ namespace timesheet.model
     {
         public EmployeeTasksAndEffort()
         {
-            tasks = new List<Task>();
-            efforts = new List<Effort>();
+            Tasks = new List<Task>();
+            Efforts = new List<Effort>();
         }
-        public List<Task> tasks { get; set; }
-        public List<Effort> efforts { get; set; }
+        public List<Task> Tasks { get; set; }
+        public List<Effort> Efforts { get; set; }
+    }
+
+    public class EmployeeDTO : Employee
+    {
+        public int Hours { get; set; }
+        public double AvgHours { get; set; }
     }
 }

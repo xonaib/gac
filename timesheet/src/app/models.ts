@@ -2,6 +2,8 @@ export interface Employee {
     Id: number;
     Code: string;
     Name: string;
+    Hours: number;
+    AvgHours: number;
 }
 
 export interface Task {
@@ -13,19 +15,24 @@ export interface Task {
 export interface Effort {
     Id: number;
     Date: number;
-    hours: number;
-    taskId: number;
-    employeeId: number;
+    Hours: number;
+    TaskId: number;
+    EmployeeId: number;
     isDirty?: boolean;
 }
 
 export interface EmployeeTasksAndEffort {
-    tasks: Task[];
-    efforts: Effort[];
+    Tasks: Task[];
+    Efforts: Effort[];
 }
 
 export interface DayToDateMapping {
     day: string;
     date: number;
     idx: number;
+}
+
+export interface WeekStartAndEndDates {
+    weekStartDate: number;
+    weekEndDate: number;
 }

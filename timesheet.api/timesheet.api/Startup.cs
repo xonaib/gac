@@ -35,7 +35,7 @@ namespace timesheet.api
             // add reference to service
             services.AddScoped<EmployeeService, EmployeeService>();
 
-            // for routing
+            // for routing, do not use camel casing for serializer
             services.AddMvc()
                 .AddJsonOptions(options => options.SerializerSettings.ContractResolver = new DefaultContractResolver());
         }

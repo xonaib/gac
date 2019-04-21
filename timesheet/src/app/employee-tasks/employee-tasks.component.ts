@@ -65,7 +65,7 @@ export class EmployeeTasksComponent implements OnInit {
     this.updateStartAndEndOfWeekFromWeekNumber();
 
     // fetch employees
-    this.employeeService.getallemployees().subscribe(data => {
+    this.employeeService.getallemployees(Number(this.weekStartDate), Number(this.weekEndDate)).subscribe(data => {
       this.employees = data;
 
       this.updatePageForEmployeeChange();
@@ -91,7 +91,7 @@ export class EmployeeTasksComponent implements OnInit {
       .subscribe((data: EmployeeTasksAndEffort) => {
         console.log(data);
 
-        this.tasks = data.tasks;
+        this.tasks = data.Tasks;
 
         // initialize empty array with 7 number of days
         this.workHoursByDay = Array(7).fill(0);
@@ -99,9 +99,8 @@ export class EmployeeTasksComponent implements OnInit {
 
         // rows
         this.tasks.forEach((task: Task, idx: number) => {
-          let taskEfforts: Effort[] = data.efforts.filter(f => f.taskId == task.Id),
+          let taskEfforts: Effort[] = data.Efforts.filter(f => f.TaskId === task.Id),
             orderedTasks: Effort[] = [];
-            //hoursForDay: number = 0;
 
           if (taskEfforts == null) {
             taskEfforts = [];
@@ -110,27 +109,26 @@ export class EmployeeTasksComponent implements OnInit {
           // cols
           this.daysOfWeek.forEach((day: DayToDateMapping, dayIdx: number) => {
             day.date = Number(day.date);
-            let taskForDay: Effort = taskEfforts.find(f => f.Date == day.date);
+            let taskForDay: Effort = taskEfforts.find(f => f.Date === day.date);
 
             if (taskForDay == null) {
               taskForDay = {
                 Id: 0,
                 Date: day.date,
-                hours: 0,
-                taskId: task.Id,
-                employeeId: this.empId
+                Hours: 0,
+                TaskId: task.Id,
+                EmployeeId: this.empId
               };
             }
 
-            this.workHoursByDay[dayIdx] += taskForDay.hours;
-            // hoursForDay += taskForDay.hours;
+            this.workHoursByDay[dayIdx] += taskForDay.Hours;
+
             orderedTasks.push(taskForDay);
           });
 
-          // this.empEfforts[task.id] = orderedTasks;
+
           this.empEfforts.set(task.Id, orderedTasks);
         });
-        // empEfforts
       });
   }
 
@@ -149,6 +147,8 @@ export class EmployeeTasksComponent implements OnInit {
       this.displayWeek = this.displayWeek + dir;
 
       this.updateStartAndEndOfWeekFromWeekNumber();
+
+      this.updatePageForEmployeeChange();
     }
   }
 
@@ -161,14 +161,9 @@ export class EmployeeTasksComponent implements OnInit {
     const current = moment().day('Monday').week(this.displayWeek),
       self = this;
 
-    // this.weekStartDate = current.startOf('week').isoWeekday(1).format(this.dateFormat); //today.startOf('isoWeek');
-    // this.weekEndDate = current.startOf('week').isoWeekday(1).add(7, 'day').format(this.dateFormat);
-    // current.endOf('week').isoWeekday(0).format(this.dateFormat);
-
     this.daysOfWeek = Array.apply(null, Array(7)).map(function (_, i) {
       const dt = moment(current.toDate()).add(i, 'day');
-      // moment(current.toDate()).add(i, 'day').startOf('week').isoWeekday(i + 1);
-      // moment(i, 'e').startOf('week').isoWeekday(i + 1);
+
       return {
         day: dt.format('dddd'),
         date: dt.format(self.dateFormat),
@@ -204,9 +199,6 @@ export class EmployeeTasksComponent implements OnInit {
 
   addHours(modaltemplate: TemplateRef<any>) {
 
-    //if (!this.form.valid) {
-    //  return;
-    //}
     this.modalRef.hide();
     this.loggedTaskId = Number(this.loggedTaskId);
     this.dayOfWork = Number(this.dayOfWork);
@@ -219,14 +211,14 @@ export class EmployeeTasksComponent implements OnInit {
     let userEfforts: Effort[] = this.empEfforts.get(taskId);
 
     if (userEfforts != null) {
-      let userEffortIdx = userEfforts.findIndex(f => f.Date == dayOfWork);
+      const userEffortIdx = userEfforts.findIndex(f => f.Date === dayOfWork);
 
       // index of day, column
       if (userEffortIdx > -1) {
         this.anyHoursLogged = true;
 
         userEfforts[userEffortIdx].isDirty = true;
-        userEfforts[userEffortIdx].hours = this.loggedHours;
+        userEfforts[userEffortIdx].Hours = this.loggedHours;
 
         // reset hours for day to zero
         this.workHoursByDay[userEffortIdx] = 0;
@@ -236,13 +228,13 @@ export class EmployeeTasksComponent implements OnInit {
         this.tasks.forEach((task: Task, idx: number) => {
           const efforts: Effort[] = this.empEfforts.get(task.Id);
 
-          this.workHoursByDay[userEffortIdx] += efforts[userEffortIdx].hours;
+          this.workHoursByDay[userEffortIdx] += efforts[userEffortIdx].Hours;
         });
       }
     }
 
     // reset stuff
-    this.loggedTaskId = this.tasks[0].id;
+    this.loggedTaskId = this.tasks[0].Id;
     this.dayOfWork = this.daysOfWeek[0].date;
     this.loggedHours = 1;
 
@@ -272,7 +264,7 @@ export class EmployeeTasksComponent implements OnInit {
       }
     });
 
-    if (userAddedEfforts.length == 0) {
+    if (userAddedEfforts.length === 0) {
       // nothig to update, return
 
       this.modalTitle = 'Nothing to save';
